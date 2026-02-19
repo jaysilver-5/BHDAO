@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import SearchTopNav from "@/components/search/SearchTopNav"
 import SearchHero from "@/components/search/SearchHero"
 import SearchBar from "@/components/search/SearchBar"
@@ -7,7 +8,7 @@ import ResultsGrid from "@/components/search/ResultsGrid"
 export default function SearchPage() {
   return (
     <main className="relative min-h-screen overflow-hidden">
-      {/* Background must be behind */}
+      {/* Background behind everything */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div
           className="absolute inset-0"
@@ -26,10 +27,26 @@ export default function SearchPage() {
       <div className="relative z-10">
         <SearchTopNav />
         <SearchHero />
-        <SearchBar />
-        <Filters />
-        <ResultsGrid />
+
+        {/* Anything using useSearchParams must be under Suspense */}
+        <Suspense fallback={<SearchShellFallback />}>
+          <SearchBar />
+          <Filters />
+          <ResultsGrid />
+        </Suspense>
       </div>
     </main>
+  )
+}
+
+function SearchShellFallback() {
+  return (
+    <section className="pb-24">
+      <div className="container-page">
+        <div className="mx-auto max-w-3xl rounded-2xl bg-white/5 p-6 text-white/70 backdrop-blur">
+          Loading search…
+        </div>
+      </div>
+    </section>
   )
 }
