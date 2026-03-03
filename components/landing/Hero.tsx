@@ -1,218 +1,192 @@
-"use client";
+“use client”;
 
-import { useState } from "react";
+import { useState, useEffect } from “react”;
 
-type Img = { src: string; alt: string };
-
-const IMAGES: Img[] = [
-  {
-    src: "https://upload.wikimedia.org/wikipedia/commons/8/81/Martin_Luther_King_-_March_on_Washington.jpg",
-    alt: "Martin Luther King Jr speaking at the March on Washington",
-  },
-  {
-    src: "https://upload.wikimedia.org/wikipedia/commons/e/ed/First_Tuskeegee_Class.jpg",
-    alt: "First Tuskegee Airmen class lined up on an airfield",
-  },
-  {
-    src: "https://upload.wikimedia.org/wikipedia/commons/6/68/Ss-booker-t-washington-1943.jpg",
-    alt: "Crew of the SS Booker T. Washington, 1943",
-  },
+const IMAGES = [
+{
+src: “https://upload.wikimedia.org/wikipedia/commons/8/81/Martin_Luther_King_-_March_on_Washington.jpg”,
+alt: “Martin Luther King Jr at the March on Washington”,
+},
+{
+src: “https://upload.wikimedia.org/wikipedia/commons/e/ed/First_Tuskeegee_Class.jpg”,
+alt: “First Tuskegee Airmen class”,
+},
+{
+src: “https://upload.wikimedia.org/wikipedia/commons/6/68/Ss-booker-t-washington-1943.jpg”,
+alt: “Crew of the SS Booker T. Washington, 1943”,
+},
 ];
 
-const SUGGESTIONS = ["Martin Luther King", "Harlem Renaissance", "Black inventors"];
+const PLACEHOLDERS = [
+“Martin Luther King”,
+“Harlem Renaissance”,
+“Black inventors”,
+“Tuskegee Airmen”,
+“Civil rights movement”,
+];
 
 export default function Hero() {
-  const [query, setQuery] = useState("");
+const [query, setQuery] = useState(””);
+const [phIdx, setPhIdx] = useState(0);
 
-  return (
-    <section className="relative overflow-hidden">
-      {/* ONE continuous background. No bottom fade strip that causes a visible break. */}
-      <div className="absolute inset-0">
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(1200px 760px at 18% 10%, rgba(232,195,106,0.30), transparent 62%)," +
-              "radial-gradient(980px 760px at 82% 18%, rgba(200,107,60,0.26), transparent 62%)," +
-              "radial-gradient(900px 760px at 45% 95%, rgba(122,166,255,0.12), transparent 62%)," +
-              "linear-gradient(to bottom, rgba(0,0,0,0.06), rgba(0,0,0,0.62))",
-          }}
-        />
-        <div className="absolute inset-0 opacity-60 bg-[conic-gradient(from_220deg_at_50%_35%,rgba(255,255,255,0.14),rgba(255,255,255,0.03),rgba(255,255,255,0.10),rgba(255,255,255,0.03))]" />
+useEffect(() => {
+const t = setInterval(() => setPhIdx((i) => (i + 1) % PLACEHOLDERS.length), 3200);
+return () => clearInterval(t);
+}, []);
+
+return (
+<section className="relative min-h-[100svh] overflow-hidden">
+{/* Background layers */}
+<div className="absolute inset-0 bg-[#050407]" />
+<div
+className=“absolute inset-0”
+style={{
+background:
+“radial-gradient(1400px 800px at 10% 0%, rgba(232,195,106,0.22), transparent 60%),” +
+“radial-gradient(1100px 800px at 90% 10%, rgba(180,90,50,0.18), transparent 60%),” +
+“radial-gradient(800px 600px at 50% 100%, rgba(100,140,255,0.06), transparent 60%)”,
+}}
+/>
+<div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjAuNSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjAzKSIvPjwvc3ZnPg==')] opacity-60" />
+
+```
+  <div className="container-page relative flex min-h-[100svh] flex-col">
+    {/* Nav */}
+    <nav className="flex items-center justify-between pt-6">
+      <a href="/" className="flex items-center gap-3">
+        <div className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-[#e8c36a]/20 to-[#c86b3c]/20 text-sm font-black text-white ring-1 ring-white/10 backdrop-blur-sm">
+          BH
+        </div>
+        <div className="leading-tight">
+          <div className="text-[13px] font-semibold text-white tracking-wide">BHDao</div>
+          <div className="text-[11px] text-white/50">Black History DAO</div>
+        </div>
+      </a>
+
+      <div className="flex items-center gap-3">
+        <a href="/explore" className="hidden text-[13px] text-white/60 transition hover:text-white sm:block">
+          Explore
+        </a>
+        <a href="/how-it-works" className="hidden text-[13px] text-white/60 transition hover:text-white sm:block">
+          How it works
+        </a>
+        <a
+          href="/proposals/new"
+          className="rounded-xl bg-white/8 px-4 py-2 text-[13px] font-medium text-white ring-1 ring-white/10 transition hover:bg-white/12"
+        >
+          Submit artifact
+        </a>
       </div>
+    </nav>
 
-      <div className="container-page relative pt-14 pb-12 sm:pt-16 sm:pb-14">
-        {/* Top bar (less height, less noise) */}
-        <div className="flex items-center justify-between">
-          <a href="/" className="flex items-center gap-3">
-            <div
-              className="grid h-10 w-10 place-items-center rounded-2xl bg-white/10 text-sm font-black text-white backdrop-blur"
-              style={{
-                boxShadow: "0 0 0 1px rgba(232,195,106,0.22), 0 0 42px rgba(200,107,60,0.14)",
-              }}
-            >
-              BH
-            </div>
-            <div className="leading-tight">
-              <div className="text-sm font-semibold text-white">BHDao</div>
-              <div className="text-xs text-white/60">Black History DAO</div>
-            </div>
-          </a>
+    {/* Main content */}
+    <div className="flex flex-1 items-center py-12">
+      <div className="grid w-full gap-12 md:grid-cols-12 md:gap-8 lg:gap-16">
+        {/* Left */}
+        <div className="flex flex-col justify-center md:col-span-7">
+          <div className="inline-flex w-fit items-center gap-2 rounded-full bg-white/6 px-3.5 py-1.5 ring-1 ring-white/8">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#e8c36a]" />
+            <span className="text-[11px] font-medium tracking-wide text-white/70">
+              Community verified · IPFS stored · On-chain proof
+            </span>
+          </div>
 
-          <div className="hidden items-center gap-2 sm:flex">
-            <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/80">
-              IPFS + on chain proof
+          <h1 className="mt-7 text-[clamp(2.4rem,5.5vw,4.2rem)] font-semibold leading-[1.05] tracking-tight text-white">
+            Black history,
+            <br />
+            <span className="bg-gradient-to-r from-[#e8c36a] via-[#d4a050] to-[#c86b3c] bg-clip-text text-transparent">
+              preserved forever.
             </span>
-            <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/80">
-              DAO verified
-            </span>
+          </h1>
+
+          <p className="mt-5 max-w-lg text-[15px] leading-relaxed text-white/55 sm:text-base">
+            Submit historical artifacts. The community reviews. Experts verify.
+            Everything is stored on IPFS and anchored to the blockchain — permanent, searchable, and tamper-proof.
+          </p>
+
+          {/* Search */}
+          <div className="mt-8 max-w-xl">
+            <div className="relative flex items-center rounded-2xl bg-white/5 ring-1 ring-white/8 transition-all focus-within:ring-white/20">
+              <span className="pl-4 text-white/30">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="M21 21l-4.35-4.35" strokeLinecap="round" />
+                </svg>
+              </span>
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={`Search "${PLACEHOLDERS[phIdx]}"`}
+                className="w-full bg-transparent px-3 py-3.5 text-sm text-white outline-none placeholder:text-white/30"
+              />
+              <a
+                href={query.trim() ? `/search?q=${encodeURIComponent(query.trim())}` : "/search"}
+                className="mr-1.5 rounded-xl bg-white px-5 py-2 text-[13px] font-semibold text-black transition hover:bg-white/90"
+              >
+                Search
+              </a>
+            </div>
+
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {PLACEHOLDERS.slice(0, 4).map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setQuery(s)}
+                  className="rounded-full bg-white/5 px-3 py-1 text-[11px] text-white/50 ring-1 ring-white/6 transition hover:bg-white/8 hover:text-white/70"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Stats */}
+          <div className="mt-10 flex gap-8">
+            <Stat label="Storage" value="IPFS pinned" />
+            <Stat label="Proof" value="On-chain" />
+            <Stat label="Review" value="DAO verified" />
           </div>
         </div>
 
-        {/* Main layout: less gap, more breathing */}
-        <div className="mt-10 grid items-start gap-10 md:grid-cols-12 md:gap-10">
-          {/* Left */}
-          <div className="md:col-span-7">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs text-white/85">
-              <span className="h-1.5 w-1.5 rounded-full bg-[var(--gold)]" />
-              Community verified archive
-            </div>
-
-            {/* Headline (2–3 lines max) */}
-            <h1 className="mt-5 text-balance text-4xl font-semibold tracking-tight leading-[1.05] text-white sm:text-6xl">
-              Black history,
-              <span className="text-white/85"> preserved and searchable </span>
-              forever.
-            </h1>
-
-            {/* Subline: short */}
-            <p className="mt-4 max-w-xl text-pretty text-base leading-relaxed text-white/78 sm:text-lg">
-              Submit artifacts. Verify through DAO review. Publish with provenance and resilient storage.
-            </p>
-
-            {/* CTAs (clean, no heavy card) */}
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <a
-                href="/explore"
-                className="inline-flex items-center justify-center rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black shadow-[0_18px_55px_rgba(0,0,0,0.45)] transition hover:-translate-y-0.5"
-              >
-                Explore archive →
-              </a>
-              <a
-                href="/proposals/new"
-                className="inline-flex items-center justify-center rounded-xl border border-white/20 bg-white/5 px-5 py-3 text-sm font-semibold text-white backdrop-blur transition hover:-translate-y-0.5 hover:bg-white/10"
-              >
-                Submit an artifact
-              </a>
-              <a
-                href="/how-it-works"
-                className="inline-flex items-center justify-center px-2 py-3 text-sm font-semibold text-white/75 transition hover:text-white sm:ml-auto"
-              >
-                How it works
-              </a>
-            </div>
-
-            {/* Search moved lower + slimmer (optional but still visible) */}
-            <div className="mt-10">
-              <div className="rounded-2xl bg-white/5 p-3 backdrop-blur">
-                <div className="flex items-center gap-3 rounded-2xl bg-black/25 px-4 py-3">
-                  <span className="text-white/70">🔎</span>
-                  <input
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder={`Search "${SUGGESTIONS[0]}"`}
-                    className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/40 sm:text-base"
-                  />
-                  <a
-                    href={
-                      query.trim()
-                        ? `/search?q=${encodeURIComponent(query.trim())}`
-                        : "/search"
-                    }
-                    className="inline-flex items-center justify-center rounded-xl bg-white px-4 py-2 text-sm font-semibold text-black transition hover:-translate-y-0.5"
-                  >
-                    Search
-                  </a>
-                </div>
-
-                <div className="mt-3 flex flex-wrap gap-2 px-1">
-                  {SUGGESTIONS.map((s) => (
-                    <button
-                      key={s}
-                      type="button"
-                      onClick={() => setQuery(s)}
-                      className="rounded-full bg-white/10 px-3 py-1.5 text-xs text-white/80 transition hover:bg-white/15"
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
+        {/* Right: Image grid */}
+        <div className="hidden md:col-span-5 md:flex md:items-center">
+          <div className="relative w-full">
+            <div className="absolute -inset-8 rounded-[32px] bg-gradient-to-br from-[#e8c36a]/8 to-[#c86b3c]/6 blur-3xl" />
+            <div className="relative grid gap-3">
+              <div className="grid grid-cols-2 gap-3">
+                <ImgCard {...IMAGES[0]} className="aspect-[3/4]" />
+                <ImgCard {...IMAGES[1]} className="aspect-[3/4]" />
               </div>
-
-              <div className="mt-4 grid max-w-xl grid-cols-3 gap-3">
-                <MiniStat label="Storage" value="IPFS" />
-                <MiniStat label="Proof" value="On chain" />
-                <MiniStat label="Review" value="DAO vote" />
-              </div>
-            </div>
-          </div>
-
-          {/* Right: larger images again, no borders, equal height top row */}
-          <div className="md:col-span-5">
-            <div className="relative">
-              <div className="absolute -inset-6 rounded-[28px] bg-white/6 blur-2xl" />
-
-              <div className="relative grid gap-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <ImageCard className="aspect-[4/5]" {...IMAGES[0]} priority />
-                  <ImageCard className="aspect-[4/5]" {...IMAGES[1]} />
-                </div>
-                <ImageCard className="aspect-[16/9]" {...IMAGES[2]} />
-              </div>
-
-              {/* subtle, optional glow line */}
-              <div className="pointer-events-none absolute -bottom-3 left-8 right-8 h-px bg-gradient-to-r from-transparent via-[rgba(232,195,106,0.55)] to-transparent" />
+              <ImgCard {...IMAGES[2]} className="aspect-[2.2/1]" />
             </div>
           </div>
         </div>
       </div>
-    </section>
-  );
+    </div>
+  </div>
+
+  {/* Bottom fade into next section */}
+  <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#050407] to-transparent" />
+</section>
+```
+
+);
 }
 
-function MiniStat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-2xl bg-white/5 p-4 backdrop-blur">
-      <div className="text-xs text-white/60">{label}</div>
-      <div className="mt-1 text-sm font-semibold text-white">{value}</div>
-    </div>
-  );
+function Stat({ label, value }: { label: string; value: string }) {
+return (
+<div>
+<div className="text-[11px] font-medium uppercase tracking-widest text-white/30">{label}</div>
+<div className="mt-1 text-sm font-semibold text-white/80">{value}</div>
+</div>
+);
 }
 
-function ImageCard({
-  src,
-  alt,
-  className = "",
-  priority = false,
-}: {
-  src: string;
-  alt: string;
-  className?: string;
-  priority?: boolean;
-}) {
-  return (
-    <div
-      className={`relative overflow-hidden rounded-3xl bg-white/5 shadow-[0_18px_55px_rgba(0,0,0,0.55)] ${className}`}
-    >
-      <img
-        src={src}
-        alt={alt}
-        loading={priority ? "eager" : "lazy"}
-        className="h-full w-full object-cover opacity-[0.95]"
-        referrerPolicy="no-referrer"
-      />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_520px_at_20%_15%,rgba(232,195,106,0.12),transparent_55%)]" />
-    </div>
-  );
+function ImgCard({ src, alt, className = “” }: { src: string; alt: string; className?: string }) {
+return (
+<div className={`relative overflow-hidden rounded-2xl bg-white/5 ring-1 ring-white/8 ${className}`}>
+<img src={src} alt={alt} loading="lazy" className="h-full w-full object-cover" referrerPolicy="no-referrer" />
+<div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10" />
+</div>
+);
 }
