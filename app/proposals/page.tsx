@@ -9,14 +9,8 @@ import { useAuth } from "@/lib/auth-context";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-const FILTERS = [
-  { key: "COMMUNITY_REVIEW", label: "Community Review" },
-  { key: "EXPERT_REVIEW", label: "Expert Review" },
-];
-
 export default function ProposalsPage() {
-  const { user, token, loading: authLoading } = useAuth();
-  const [filter, setFilter] = useState("COMMUNITY_REVIEW");
+  const { user, token } = useAuth();
   const [artifacts, setArtifacts] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -26,15 +20,9 @@ export default function ProposalsPage() {
   const limit = 12;
 
   useEffect(() => {
-    // Community review is public, expert review needs auth
-    if (filter === "EXPERT_REVIEW" && !token) return;
     setLoading(true);
 
-    const fetchData = filter === "COMMUNITY_REVIEW"
-      ? api.artifacts.review()
-      : api.artifacts.listByStatus(filter, token!);
-
-    fetchData
+    api.artifacts.review()
       .then(async (d) => {
         setArtifacts(d.items);
         setTotal(d.total);
@@ -59,28 +47,7 @@ export default function ProposalsPage() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [token, filter, page]);
-
-  // ─── Auth guard for expert tab only ───
-  if (!authLoading && !user && filter === "EXPERT_REVIEW") {
-    return (
-      <div className="min-h-screen">
-        <Nav />
-        <div className="mx-auto max-w-4xl px-5 py-20 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#e8c36a]/[0.06] ring-1 ring-[#e8c36a]/10">
-            <span className="text-2xl">🔒</span>
-          </div>
-          <h2 className="mt-5 text-lg font-semibold text-white/80">Connect your wallet</h2>
-          <p className="mt-2 text-[13px] text-white/35">
-            Connect to view expert review queue.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  const communityCount = filter === "COMMUNITY_REVIEW" ? total : 0;
-  const expertCount = filter === "EXPERT_REVIEW" ? total : 0;
+  }, [token, page]);
 
   return (
     <div className="min-h-screen">
@@ -117,45 +84,12 @@ export default function ProposalsPage() {
           </Link>
         </div>
 
-        {/* Filter tabs */}
-        <div className="mt-6 flex gap-2">
-          {FILTERS.map((f) => (
-            <button
-              key={f.key}
-              onClick={() => {
-                setFilter(f.key);
-                setPage(1);
-              }}
-              className={`rounded-xl px-4 py-2 text-[12px] font-medium transition ring-1 ${
-                filter === f.key
-                  ? f.key === "COMMUNITY_REVIEW"
-                    ? "bg-yellow-500/10 text-yellow-400 ring-yellow-500/20"
-                    : "bg-blue-500/10 text-blue-400 ring-blue-500/20"
-                  : "bg-white/[0.02] text-white/30 ring-white/[0.05] hover:bg-white/[0.04] hover:text-white/50"
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
-
         {/* Info banner */}
-        {filter === "COMMUNITY_REVIEW" && (
-          <div className="mt-4 rounded-xl bg-yellow-500/[0.04] px-4 py-3 text-[12px] text-yellow-500/60 ring-1 ring-yellow-500/10">
-            <strong className="text-yellow-400/80">How voting works:</strong> Each artifact needs ≥3
-            votes with ≥60% approval to advance to expert review. You get one vote per artifact.
-            The review window is 7 days.
-          </div>
-        )}
-
-        {filter === "EXPERT_REVIEW" && (
-          <div className="mt-4 rounded-xl bg-blue-500/[0.04] px-4 py-3 text-[12px] text-blue-500/60 ring-1 ring-blue-500/10">
-            These artifacts passed community voting and are awaiting expert verification.
-            {user?.role === "EXPERT" || user?.role === "ADMIN"
-              ? " You can review these from the artifact detail page."
-              : " Only experts can approve or reject at this stage."}
-          </div>
-        )}
+        <div className="mt-6 rounded-xl bg-yellow-500/[0.04] px-4 py-3 text-[12px] text-yellow-500/60 ring-1 ring-yellow-500/10">
+          <strong className="text-yellow-400/80">How voting works:</strong> Each artifact needs ≥3
+          votes with ≥60% approval to advance to expert review. You get one vote per artifact.
+          The review window is 7 days.
+        </div>
 
         {/* Results */}
         {loading ? (
@@ -170,7 +104,7 @@ export default function ProposalsPage() {
               <span className="text-2xl opacity-30">📭</span>
             </div>
             <div className="mt-5 text-[13px] text-white/30">
-              No artifacts in {filter === "COMMUNITY_REVIEW" ? "community" : "expert"} review right now.
+              No artifacts in community review right now.
             </div>
           </div>
         ) : (

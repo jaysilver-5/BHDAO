@@ -70,7 +70,7 @@ export default function Hero() {
               How it works
             </a>
             <a
-              href="/proposals/new"
+              href="/submit"
               className="rounded-xl bg-white/8 px-4 py-2 text-[13px] font-medium text-white ring-1 ring-white/10 transition hover:bg-white/12"
             >
               Submit artifact
