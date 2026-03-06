@@ -6,42 +6,66 @@ import ProofBadge from "@/components/ProofBadge";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
 
 function ExploreInner() {
   const params = useSearchParams();
+  const router = useRouter();
   const { user } = useAuth();
-  const initialQ = params.get("q") ?? "";
-  const [query, setQuery] = useState(initialQ);
+
+  const urlQuery = params.get("q") ?? "";
+  const [query, setQuery] = useState(urlQuery);
   const [artifacts, setArtifacts] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const limit = 12;
 
+  // Sync input when URL changes (e.g. from Hero navigation)
+  useEffect(() => {
+    setQuery(urlQuery);
+    setPage(1);
+  }, [urlQuery]);
+
+  // Fetch: search API when query present, otherwise list all
   useEffect(() => {
     setLoading(true);
-    api.artifacts
-      .list(`page=${page}&limit=${limit}`)
+
+    const fetchData = urlQuery.trim()
+      ? api.artifacts.search(urlQuery.trim(), `page=${page}&limit=${limit}`)
+      : api.artifacts.list(`page=${page}&limit=${limit}`);
+
+    fetchData
       .then((d) => {
         setArtifacts(d.items);
         setTotal(d.total);
       })
-      .catch(() => {})
+      .catch(() => {
+        setArtifacts([]);
+        setTotal(0);
+      })
       .finally(() => setLoading(false));
-  }, [page]);
+  }, [urlQuery, page]);
 
-  const filtered = query.trim()
-    ? artifacts.filter(
-        (a) =>
-          a.title?.toLowerCase().includes(query.toLowerCase()) ||
-          a.description?.toLowerCase().includes(query.toLowerCase()) ||
-          a.tags?.some((t: string) => t.toLowerCase().includes(query.toLowerCase())),
-      )
-    : artifacts;
+  function handleSearch() {
+    const q = query.trim();
+    setPage(1);
+    router.replace(q ? `/explore?q=${encodeURIComponent(q)}` : "/explore", { scroll: false });
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "Enter") handleSearch();
+  }
+
+  function handleClear() {
+    setQuery("");
+    setPage(1);
+    router.replace("/explore", { scroll: false });
+  }
 
   const totalPages = Math.ceil(total / limit);
+  const isSearching = !!urlQuery.trim();
 
   return (
     <div className="min-h-screen">
@@ -60,10 +84,21 @@ function ExploreInner() {
               <span className="text-[#e8c36a]">◆</span> Public Archive
             </div>
             <h1 className="text-3xl font-semibold tracking-tight text-[#f0ede6]">
-              Explore the archive
+              {isSearching ? (
+                <>
+                  Results for{" "}
+                  <span className="bg-gradient-to-r from-[#e8c36a] to-[#d4a050] bg-clip-text text-transparent">
+                    &ldquo;{urlQuery}&rdquo;
+                  </span>
+                </>
+              ) : (
+                "Explore the archive"
+              )}
             </h1>
             <p className="mt-2 text-[13px] text-white/35">
-              {total} verified artifact{total !== 1 ? "s" : ""} — community reviewed, expert verified, on-chain proven.
+              {isSearching
+                ? `${total} result${total !== 1 ? "s" : ""} found`
+                : `${total} verified artifact${total !== 1 ? "s" : ""} — community reviewed, expert verified, on-chain proven.`}
             </p>
           </div>
           <Link
@@ -76,7 +111,7 @@ function ExploreInner() {
         </div>
 
         {/* Proposals CTA */}
-        {user && (
+        {user && !isSearching && (
           <Link
             href="/proposals"
             className="mt-6 flex items-center justify-between rounded-2xl bg-yellow-500/[0.04] px-5 py-3.5 ring-1 ring-yellow-500/10 transition hover:bg-yellow-500/[0.06] hover:ring-yellow-500/15"
@@ -103,14 +138,21 @@ function ExploreInner() {
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={handleKeyDown}
               placeholder="Search by title, description, or tag…"
               className="w-full bg-transparent px-3 py-3.5 text-[13px] text-white/80 outline-none placeholder:text-white/20"
             />
             {query && (
-              <button onClick={() => setQuery("")} className="pr-4 text-[11px] text-white/25 transition hover:text-white/50">
+              <button onClick={handleClear} className="pr-2 text-[11px] text-white/25 transition hover:text-white/50">
                 Clear
               </button>
             )}
+            <button
+              onClick={handleSearch}
+              className="mr-1.5 shrink-0 rounded-xl bg-gradient-to-r from-[#e8c36a] to-[#c9a44e] px-5 py-2 text-[13px] font-semibold text-black transition hover:shadow-[0_0_20px_rgba(232,195,106,0.15)]"
+            >
+              Search
+            </button>
           </div>
         </div>
 
@@ -121,25 +163,34 @@ function ExploreInner() {
               <div key={i} className="h-[300px] animate-pulse rounded-2xl bg-white/[0.025] ring-1 ring-white/[0.04]" />
             ))}
           </div>
-        ) : filtered.length === 0 ? (
+        ) : artifacts.length === 0 ? (
           <div className="mt-24 text-center">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-white/[0.03] ring-1 ring-white/[0.06]">
               <span className="text-2xl opacity-40">🔍</span>
             </div>
             <div className="mt-5 text-[13px] text-white/35">
-              {query ? `No results for "${query}"` : "No verified artifacts yet."}
+              {isSearching ? `No results for "${urlQuery}"` : "No verified artifacts yet."}
             </div>
-            <Link
-              href="/submit"
-              className="mt-5 inline-flex rounded-xl bg-white/5 px-5 py-2.5 text-[12px] font-medium text-white/70 ring-1 ring-white/8 transition hover:bg-white/8"
-            >
-              Be the first to submit
-            </Link>
+            {isSearching ? (
+              <button
+                onClick={handleClear}
+                className="mt-5 inline-flex rounded-xl bg-white/5 px-5 py-2.5 text-[12px] font-medium text-white/70 ring-1 ring-white/8 transition hover:bg-white/8"
+              >
+                Clear search
+              </button>
+            ) : (
+              <Link
+                href="/submit"
+                className="mt-5 inline-flex rounded-xl bg-white/5 px-5 py-2.5 text-[12px] font-medium text-white/70 ring-1 ring-white/8 transition hover:bg-white/8"
+              >
+                Be the first to submit
+              </Link>
+            )}
           </div>
         ) : (
           <>
             <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {filtered.map((a) => (
+              {artifacts.map((a) => (
                 <ArtifactCard key={a.id} artifact={a} />
               ))}
             </div>

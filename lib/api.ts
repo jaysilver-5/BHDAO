@@ -71,10 +71,14 @@ export const api = {
       request(`/artifacts/${id}/withdraw`, { method: "POST", token }),
     activity: (id: string, token?: string | null) =>
       request<any[]>(`/artifacts/${id}/activity`, { token: token ?? undefined }),
-      review: (params?: string) =>
-    request<{ items: any[]; total: number; page: number; limit: number }>(
-      `/artifacts/review${params ? `?${params}` : ""}`,
-    ),
+    review: (params?: string) =>
+      request<{ items: any[]; total: number; page: number; limit: number }>(
+        `/artifacts/review${params ? `?${params}` : ""}`,
+      ),
+    search: (q: string, params?: string) =>
+      request<{ items: any[]; total: number; page: number; limit: number }>(
+        `/artifacts/search?q=${encodeURIComponent(q)}${params ? `&${params}` : ""}`,
+      ),
   },
 
   // ─── Votes ───
