@@ -16,7 +16,7 @@ function nowTime() {
 
 export default function AuthPlaygroundPage() {
   const API_BASE = useMemo(() => {
-    return "https://bhdao-backend-production.up.railway.app"
+    return "https://bhdao-backend-production.up.railway.app/"
   }, [])
 
   // ─── Auth state ───
