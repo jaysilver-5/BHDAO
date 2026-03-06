@@ -9,8 +9,6 @@ import { useState, useRef } from "react";
 const TYPES = ["image", "audio", "video", "document"];
 const LANGUAGES = ["en", "es", "fr", "pt", "ar", "sw", "ha", "yo", "zu", "other"];
 
-const BASE = "https://bhdao-backend-production.up.railway.app";
-
 export default function SubmitPage() {
   const { user, token, loading } = useAuth();
   const router = useRouter();
@@ -96,15 +94,7 @@ export default function SubmitPage() {
     setUploading(true);
     setErr("");
     try {
-      const form = new FormData();
-      form.append("file", file);
-      const res = await fetch(`${BASE}/artifacts/${artifactId}/upload`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: form,
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.message ?? "Upload failed");
+      await api.artifacts.upload(artifactId, file, token);
       setUploadDone(true);
       setStep(3);
     } catch (e: any) {
