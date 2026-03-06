@@ -9,7 +9,7 @@ import { useState, useRef } from "react";
 const TYPES = ["image", "audio", "video", "document"];
 const LANGUAGES = ["en", "es", "fr", "pt", "ar", "sw", "ha", "yo", "zu", "other"];
 
-const BASE = "https://bh-dao.vercel.app";
+const BASE = "https://bhdao-backend-production.up.railway.app";
 
 export default function SubmitPage() {
   const { user, token, loading } = useAuth();
