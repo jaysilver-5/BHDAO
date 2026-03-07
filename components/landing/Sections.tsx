@@ -28,8 +28,8 @@ function TrustAndProvenance() {
             If something is wrong, the community can flag it for review.
           </p>
           <div className="mt-7 flex flex-col gap-2.5 sm:flex-row">
-            <a href="/search" className="btn-primary">Explore archive →</a>
-            <a href="/proposals/new" className="btn-secondary">Submit artifact</a>
+            <a href="/explore" className="btn-primary">Explore archive →</a>
+            <a href="/submit" className="btn-secondary">Submit artifact</a>
           </div>
         </div>
 
@@ -96,7 +96,7 @@ function FeaturedPreview() {
             Fast scan. Strong context. Provenance always visible. Click through for full detail.
           </p>
         </div>
-        <a href="/search" className="btn-secondary shrink-0">Go to search</a>
+        <a href="/explore" className="btn-secondary shrink-0">Go to search</a>
       </div>
 
       <div className="mt-10 grid gap-4 md:grid-cols-3">
@@ -169,7 +169,7 @@ function HowItWorks() {
           </p>
           <div className="mt-7 flex flex-col gap-2.5 sm:flex-row">
             <a href="/how-it-works" className="btn-secondary">Read full flow</a>
-            <a href="/proposals/new" className="btn-primary">Create proposal →</a>
+            <a href="/explore" className="btn-primary">Create proposal →</a>
           </div>
         </div>
 
