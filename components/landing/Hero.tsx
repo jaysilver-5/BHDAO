@@ -119,7 +119,9 @@ export default function Hero() {
                     className="w-full bg-transparent px-3 py-3.5 text-sm text-white outline-none placeholder:text-white/30"
                   />
                   <a
-                    href={query.trim() ? `/search?q=${encodeURIComponent(query.trim())}` : "/search"}
+                    {/* href={query.trim() ? `/search?q=${encodeURIComponent(query.trim())}` : "/search"} */}
+                    href="/explore"
+        
                     className="mr-1.5 rounded-xl bg-white px-5 py-2 text-[13px] font-semibold text-black transition hover:bg-white/90"
                   >
                     Search
