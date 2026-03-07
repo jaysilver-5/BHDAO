@@ -19,48 +19,71 @@ export default function ProposalsPage() {
   const [page, setPage] = useState(1);
   const limit = 12;
 
-// Replace the useEffect in your proposals page with this:
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
 
-useEffect(() => {
-  setLoading(true);
+    (async () => {
+      try {
+        // api.artifacts.review takes optional params string
+        const d = await api.artifacts.review(`page=${page}&limit=${limit}`);
+        if (cancelled) return;
 
-  api.artifacts.review(page, limit)
-    .then(async (d) => {
-      setArtifacts(d.items ?? []);
-      setTotal(d.total ?? 0);
+        const items = d.items ?? [];
+        setArtifacts(items);
+        setTotal(d.total ?? 0);
 
-      // Fetch vote summaries for all items
-      // Summaries are public — no token needed
-      const summaries: Record<string, any> = {};
-      const votes: Record<string, any> = {};
+        // The review endpoint returns _count with votes/comments/flags
+        // We can use that for basic counts, but still fetch full summaries
+        // for ratio calculation
+        const summaries: Record<string, any> = {};
+        const votes: Record<string, any> = {};
 
-      await Promise.allSettled(
-        (d.items ?? []).map(async (a: any) => {
-          // Summary is public
-          const summaryPromise = api.votes.summary(a.id).catch(() => null);
+        await Promise.all(
+          items.map(async (a: any) => {
+            // Vote summary — public, no token
+            try {
+              summaries[a.id] = await api.votes.summary(a.id);
+            } catch {
+              // Fall back to _count data from review endpoint
+              if (a._count) {
+                summaries[a.id] = {
+                  approve: 0,
+                  reject: 0,
+                  total: a._count.votes ?? 0,
+                  ratio: 0,
+                };
+              }
+            }
 
-          // User's vote requires auth
-          const minePromise = token
-            ? api.votes.mine(a.id, token).catch(() => null)
-            : Promise.resolve(null);
+            // User's own vote — needs token
+            if (token) {
+              try {
+                votes[a.id] = await api.votes.mine(a.id, token);
+              } catch {
+                // not voted or not logged in
+              }
+            }
+          }),
+        );
 
-          const [vs, mv] = await Promise.all([summaryPromise, minePromise]);
+        if (!cancelled) {
+          setVoteSummaries(summaries);
+          setMyVotes(votes);
+        }
+      } catch (err) {
+        console.error("Failed to load proposals:", err);
+        if (!cancelled) {
+          setArtifacts([]);
+          setTotal(0);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
 
-          if (vs) summaries[a.id] = vs;
-          if (mv) votes[a.id] = mv;
-        }),
-      );
-
-      setVoteSummaries(summaries);
-      setMyVotes(votes);
-    })
-    .catch((err) => {
-      console.error("Failed to load proposals:", err);
-      setArtifacts([]);
-      setTotal(0);
-    })
-    .finally(() => setLoading(false));
-}, [token, page]);
+    return () => { cancelled = true; };
+  }, [token, page]);
 
   return (
     <div className="min-h-screen">
@@ -170,6 +193,14 @@ useEffect(() => {
                           <TimeRemaining endsAt={a.reviewEndsAt} label="" />
                         </>
                       )}
+                      {a._count && (
+                        <>
+                          <span>·</span>
+                          <span>{a._count.votes ?? 0} votes</span>
+                          <span>·</span>
+                          <span>{a._count.comments ?? 0} comments</span>
+                        </>
+                      )}
                       {a.tags?.length > 0 && (
                         <>
                           <span>·</span>
@@ -190,7 +221,7 @@ useEffect(() => {
 
                   {/* Vote status */}
                   <div className="flex shrink-0 items-center gap-4">
-                    {vs && (
+                    {vs && vs.total > 0 && (
                       <div className="w-36">
                         <VoteBar
                           approve={vs.approve}
