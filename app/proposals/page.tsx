@@ -19,35 +19,48 @@ export default function ProposalsPage() {
   const [page, setPage] = useState(1);
   const limit = 12;
 
-  useEffect(() => {
-    setLoading(true);
+// Replace the useEffect in your proposals page with this:
 
-    api.artifacts.review()
-      .then(async (d) => {
-        setArtifacts(d.items);
-        setTotal(d.total);
+useEffect(() => {
+  setLoading(true);
 
-        // Fetch vote summaries + user's votes in parallel
-        const summaries: Record<string, any> = {};
-        const votes: Record<string, any> = {};
-        if (token) {
-          await Promise.allSettled(
-            d.items.map(async (a: any) => {
-              const [vs, mv] = await Promise.allSettled([
-                api.votes.summary(a.id),
-                api.votes.mine(a.id, token),
-              ]);
-              if (vs.status === "fulfilled") summaries[a.id] = vs.value;
-              if (mv.status === "fulfilled") votes[a.id] = mv.value;
-            }),
-          );
-        }
-        setVoteSummaries(summaries);
-        setMyVotes(votes);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [token, page]);
+  api.artifacts.review(page, limit)
+    .then(async (d) => {
+      setArtifacts(d.items ?? []);
+      setTotal(d.total ?? 0);
+
+      // Fetch vote summaries for all items
+      // Summaries are public — no token needed
+      const summaries: Record<string, any> = {};
+      const votes: Record<string, any> = {};
+
+      await Promise.allSettled(
+        (d.items ?? []).map(async (a: any) => {
+          // Summary is public
+          const summaryPromise = api.votes.summary(a.id).catch(() => null);
+
+          // User's vote requires auth
+          const minePromise = token
+            ? api.votes.mine(a.id, token).catch(() => null)
+            : Promise.resolve(null);
+
+          const [vs, mv] = await Promise.all([summaryPromise, minePromise]);
+
+          if (vs) summaries[a.id] = vs;
+          if (mv) votes[a.id] = mv;
+        }),
+      );
+
+      setVoteSummaries(summaries);
+      setMyVotes(votes);
+    })
+    .catch((err) => {
+      console.error("Failed to load proposals:", err);
+      setArtifacts([]);
+      setTotal(0);
+    })
+    .finally(() => setLoading(false));
+}, [token, page]);
 
   return (
     <div className="min-h-screen">
