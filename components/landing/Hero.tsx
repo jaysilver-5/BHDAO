@@ -57,7 +57,7 @@ export default function Hero() {
               BH
             </div>
             <div className="leading-tight">
-              <div className="text-[13px] font-semibold text-white tracking-wide">BHDao</div>
+              <div className="text-[13px] font-semibold text-white tracking-wide">BHDAO</div>
               <div className="text-[11px] text-white/50">Black History DAO</div>
             </div>
           </a>
