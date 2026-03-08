@@ -6,7 +6,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "BHDao — Black History DAO",
+  title: "BHDAO — Black History DAO",
   description: "A community-verified archive of Black history, stored on IPFS and anchored to the blockchain.",
 };
 
