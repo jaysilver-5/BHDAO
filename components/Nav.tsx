@@ -29,7 +29,7 @@ export default function Nav() {
             <div className="grid h-8 w-8 place-items-center rounded-xl bg-gradient-to-br from-[#e8c36a]/20 to-[#c86b3c]/20 text-[10px] font-black text-white ring-1 ring-white/10">
               BH
             </div>
-            <span className="text-[13px] font-semibold text-white">BHDao</span>
+            <span className="text-[13px] font-semibold text-white">BHDAO</span>
           </Link>
 
           <div className="hidden items-center gap-1 sm:flex">
